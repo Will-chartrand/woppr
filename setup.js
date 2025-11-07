@@ -1,15 +1,16 @@
 let browseBtn;
 let pathInput;
 let saveBtn;
+let notInstalledBtn;
 let statusText;
 
 const wireUpButtons = () => {
+  notInstalledBtn.addEventListener('click', async () => {
+  });
+
   browseBtn.addEventListener('click', async () => {
-    const folderPath = await window.api.selectXLivebgPath();
-    if (folderPath) {
-      pathInput.value = folderPath;
-      statusText.textContent = '';
-    }
+    // TODO: make the install tutorial
+    window.api.send('install-tutorial', path);
   });
 
   saveBtn.addEventListener('click', () => {

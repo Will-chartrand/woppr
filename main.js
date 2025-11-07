@@ -37,46 +37,16 @@ function createSetupWindow() {
     }
   });
 
-  setupWindow.loadFile('src/setup.html');
-}
-
-// If conf doesn't exist, create it along with the directory in XDG_CONFIG_HOME
-async function checkIfConfigExists(){
-  if(process.env.XDG_CONFIG_HOME){
-    xlivebg_conf_path = path.join(process.env.XDG_CONFIG_HOME, 'xlivebg');
-    console.log("WE HAVE XDG CONFIG HOME");
-  } else if(process.env.HOME){
-    xlivebg_conf_path = path.join(process.env.XDG_CONFIG_HOME, '.config/xlivebg');
-    console.log("WE HAVE JUST HOME");
-  } else {
-    console.log("please set your HOME environment variable, idiot. Or even better set your XDG_CONFIG_HOME");
-    return;
-  }
-
-  if(fss.existsSync(xlivebg_conf_path)){
-  console.log("trying read file");
-    try {
-      const settingsJSON = await fs.readFile(path.join(xlivebg_conf_path, 'config.json'), 'utf8');
-      console.log(settingsJSON);
-
-      settings = JSON.parse(settingsJSON);
-    } catch (err) {
-      console.log(err);
-    }
-  } else { // config directory doesn't exist in .config
-    fs.mkdir(xlivebg_conf_path);
-    fs.writeFile(path.join(xlivebg_conf_path, 'config.json'), '', { encoding: 'utf-8' });
-
-  }
+  setupWindow.loadFile('src/setup/setup.html');
 }
 
 app.whenReady().then(async () => {
-  // TODO: conditional for if the user has already set up the xlivebg path
-
 
   await checkIfConfigExists();
 
-  if(settings.xlivebg_path){
+  // XXX
+  // if(settings.xlivebg_path){
+  if(false){
     xlivebg_path = settings.xlivebg_path;
     createMainWindow();
   } else {
@@ -99,59 +69,8 @@ app.on('window-all-closed', () => {
 });
 
 
-// Is called when user has finished with the setup screen
-ipcMain.handle('setup-done', function(event, data) {
-  console.log("SETUP DONE NOW");
-  createMainWindow();
-  setupWindow.destroy();
-});
-
-ipcMain.handle('get-plugins', async () => {
-  console.log('getting plugins');
-  plugin_path_list = await getPluginPaths(path.join(xlivebg_path, 'plugins'));
-  console.log("got plugins PATHS:");
-  console.log(plugin_path_list);
-  plugin_obj_list = await getPluginObjects(path.join(xlivebg_path, 'plugins'));
-
-  console.log("got plugin objects:");
-  console.log(plugin_obj_list);
-
-
-  return plugin_obj_list.map((x) => x.name);
-});
-
-ipcMain.on('select-plugin', function(event, data) {
-  console.log(data);
-
-  let newChoice;
-
-  newChoice = data.data;
-
-  console.log("new choice is " + newChoice);
-
-    try {
-      execSync("pkill xlivebg");
-      console.log("Killed existing xlivebg process.");
-    } catch {
-      console.log("pkill didn't work");
-    }
-
-  // Create and write new config choice to xlivebg config file
-  const configContents = `xlivebg {
-      active = "${newChoice}"
-  }
-  `;
-  fs.writeFile(path.join(process.env.XDG_CONFIG_HOME, 'xlivebg.conf'), configContents, { encoding: 'utf-8' });
-
-  spawn(path.join(xlivebg_path, 'xlivebg'), ['-n'], {
-    detached: true,
-    stdio: 'ignore',
-  }).unref();
-});
-
-
 /* 
- * FOR CHOOSING XLIVEBG PATH
+ * SETUP SCREEN HANDLERS
  * */
 
 ipcMain.handle('select-xlivebg-path', async () => {
@@ -165,8 +84,6 @@ ipcMain.handle('select-xlivebg-path', async () => {
 ipcMain.on('save-xlivebg-path', (event, xlivebgPath) => {
   // Here you can save it to a config file or app settings
   
-  // TODO: check if the file AND PATH exists before writing to it. maybe goober user deleted it mid execution
-
   console.log("WE HAVE THE CONF DIRECTORY:");
   console.log(xlivebg_conf_path);
   let configPath;
@@ -186,10 +103,20 @@ ipcMain.on('save-xlivebg-path', (event, xlivebgPath) => {
   console.log('XLivebg path saved:', xlivebgPath);
 });
 
+// Is called when user has finished with the setup screen
+ipcMain.handle('setup-done', function(event, data) {
+  console.log("SETUP DONE NOW");
+  // createMainWindow();
+
+  setupWindow.loadFile('src/setup/gitclone.html');
+
+  // setupWindow.destroy();
+});
+
 
 
 /* 
- * HELPERS
+ * APPLICATION HELPERS
  * */
 
 async function getPluginObjects() {
@@ -236,3 +163,80 @@ async function getPluginPaths(dir) {
 
   return results;
 }
+
+ipcMain.on('select-plugin', function(event, data) {
+  console.log(data);
+
+  let newChoice;
+
+  newChoice = data.data;
+
+  console.log("new choice is " + newChoice);
+
+    try {
+      execSync("pkill xlivebg");
+      console.log("Killed existing xlivebg process.");
+    } catch {
+      console.log("pkill didn't work");
+    }
+
+  // Create and write new config choice to xlivebg config file
+  const configContents = `xlivebg {
+      active = "${newChoice}"
+  }
+  `;
+  fs.writeFile(path.join(process.env.XDG_CONFIG_HOME, 'xlivebg.conf'), configContents, { encoding: 'utf-8' });
+
+  spawn(path.join(xlivebg_path, 'xlivebg'), ['-n'], {
+    detached: true,
+    stdio: 'ignore',
+  }).unref();
+});
+
+ipcMain.handle('get-plugins', async () => {
+  console.log('getting plugins');
+  plugin_path_list = await getPluginPaths(path.join(xlivebg_path, 'plugins'));
+  console.log("got plugins PATHS:");
+  console.log(plugin_path_list);
+  plugin_obj_list = await getPluginObjects(path.join(xlivebg_path, 'plugins'));
+
+  console.log("got plugin objects:");
+  console.log(plugin_obj_list);
+
+
+  return plugin_obj_list.map((x) => x.name);
+});
+
+
+// If conf doesn't exist, create it along with the directory in XDG_CONFIG_HOME
+async function checkIfConfigExists(){
+  if(process.env.XDG_CONFIG_HOME){
+    xlivebg_conf_path = path.join(process.env.XDG_CONFIG_HOME, 'xlivebg');
+    console.log("WE HAVE XDG CONFIG HOME");
+  } else if(process.env.HOME){
+    xlivebg_conf_path = path.join(process.env.XDG_CONFIG_HOME, '.config/xlivebg');
+    console.log("WE HAVE JUST HOME");
+  } else {
+    console.log("please set your HOME environment variable, idiot. Or even better set your XDG_CONFIG_HOME");
+    return;
+  }
+
+  if(fss.existsSync(xlivebg_conf_path)){
+  console.log("trying read file");
+    try {
+      const settingsJSON = await fs.readFile(path.join(xlivebg_conf_path, 'config.json'), 'utf8');
+      console.log(settingsJSON);
+
+      settings = JSON.parse(settingsJSON);
+    } catch (err) {
+      console.log(err);
+    }
+  } else { // config directory doesn't exist in .config
+    fs.mkdir(xlivebg_conf_path);
+    fs.writeFile(path.join(xlivebg_conf_path, 'config.json'), '', { encoding: 'utf-8' });
+
+  }
+}
+
+
+

@@ -11,6 +11,7 @@ body {
   height: 100vh;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 .main-content {
@@ -30,10 +31,26 @@ p {
   color: #aaa;
 }
 
+a {
+  color: #00cc66
+}
+
+
+
 .path-picker {
   display: flex;
   margin: 20px 0;
 }
+
+#not-installed {
+  position: absolute;
+  bottom: 20px;       /* place at bottom of the viewport or container */
+  left: 50%;
+  transform: translateX(-50%);
+  justify-content: center;
+  align-items: center;
+}
+
 
 #xlivebg-path {
   flex: 1;
