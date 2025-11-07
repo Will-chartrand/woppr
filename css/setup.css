@@ -1,0 +1,80 @@
+body {
+  margin: 0;
+  background: #1a1a1a;
+  color: #eee;
+  font-family: 'Inter', sans-serif;
+}
+
+.app-container {
+  background-color: #111;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-content {
+  padding: 40px;
+  border-radius: 12px;
+  /* box-shadow: 0 0 20px rgba(0,0,0,0.5); */
+  width: 400px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.path-picker {
+  display: flex;
+  margin: 20px 0;
+}
+
+#xlivebg-path {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px 0 0 6px;
+  border: none;
+  background: #222;
+  color: #eee;
+}
+
+#browse-btn {
+  padding: 10px 16px;
+  border: none;
+  background: #0066ff;
+  color: white;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#browse-btn:hover {
+  background: #0050cc;
+}
+
+.save-btn {
+  margin-top: 10px;
+  padding: 12px 24px;
+  border: none;
+  background: #00cc66;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-btn:hover {
+  background: #00aa55;
+}
+
+.status-text {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #ff9900;
+}
